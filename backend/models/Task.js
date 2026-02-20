@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema(
   {
-    // ✅ MUST match what frontend/backend uses: "staff"
+  
     staff: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Staff",
@@ -14,7 +14,7 @@ const taskSchema = new mongoose.Schema(
 
     priority: { type: String, enum: ["High", "Medium", "Low"], default: "Medium" },
 
-    // store as Date (recommended)
+    // store as Date
     dueDate: { type: Date, default: null },
 
     status: {

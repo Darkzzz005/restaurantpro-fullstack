@@ -15,7 +15,7 @@ const startOfMonth = (d = new Date()) => {
   return x;
 };
 
-//  1) SUMMARY CARDS (orders, revenue, reservations, customers approx)
+//  SUMMARY CARDS (orders, revenue, reservations, customers approx)
 exports.getSummary = async (req, res) => {
   try {
     const today = startOfDay(new Date());
@@ -57,7 +57,7 @@ exports.getSummary = async (req, res) => {
   }
 };
 
-//  2) Revenue by service type (Dining/Parcel/Delivery)
+//   Revenue by service type (Dining/Parcel/Delivery)
 exports.getRevenueByType = async (req, res) => {
   try {
     const data = await Order.aggregate([
@@ -84,7 +84,7 @@ exports.getRevenueByType = async (req, res) => {
   }
 };
 
-//  3) Reservation trends + table turnover (simple + meaningful)
+//  Reservation trends + table turnover (simple + meaningful)
 exports.getReservationTrends = async (req, res) => {
   try {
     // last 7 days trend
@@ -138,7 +138,7 @@ exports.getReservationTrends = async (req, res) => {
   }
 };
 
-//  4) Popular dishes / menu analysis (from order items)
+//  Popular dishes / menu analysis (from order items)
 exports.getTopItems = async (req, res) => {
   try {
     const top = await Order.aggregate([
@@ -166,7 +166,7 @@ exports.getTopItems = async (req, res) => {
   }
 };
 
-//  5) Customer satisfaction metrics (from reviews, safe fallback)
+//   Customer satisfaction metrics
 exports.getCustomerSatisfaction = async (req, res) => {
   try {
     if (!Review) {
@@ -199,7 +199,7 @@ exports.getCustomerSatisfaction = async (req, res) => {
   }
 };
 
-// 6) Delivery performance tracking (avg time to complete)
+//  Delivery performance tracking 
 exports.getDeliveryPerformance = async (req, res) => {
   try {
     // We estimate delivery performance using completed orders:

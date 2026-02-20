@@ -10,7 +10,7 @@ const Staff = require("../models/Staff");
 const Menu = require("../models/Menu");
 const Payment = require("../models/Payment");
 
-// ✅ GET /api/analytics/summary (Admin)
+// GET /api/analytics/summary (Admin)
 router.get("/summary", protect, adminOnly, async (req, res) => {
   try {
     const [

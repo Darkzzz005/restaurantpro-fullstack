@@ -32,7 +32,7 @@ export default function Reservations() {
     ? { headers: { Authorization: `Bearer ${token}` } }
     : {};
 
-  // ✅ Availability should be PUBLIC, so DO NOT send token here
+
   const checkAvailability = async (d, t) => {
     if (!d || !t) return;
     try {
@@ -41,13 +41,13 @@ export default function Reservations() {
       );
       setBookedTables(res.data.bookedTables || []);
     } catch (e) {
-      // If your backend is forcing auth here, you'll see it
+
       setBookedTables([]);
       console.log("Availability error:", e?.response?.data || e.message);
     }
   };
 
-  // ✅ Admin list should only be fetched by admin
+  //  Admin list should only be fetched by admin
   const fetchReservations = async () => {
     if (!isAdmin) return;
     try {
@@ -60,11 +60,10 @@ export default function Reservations() {
 
   useEffect(() => {
     fetchReservations();
-    // eslint-disable-next-line
+    
   }, []);
 
-  // ✅ Booking is a PROTECTED route => must send token
-  // If admin is on this page, block booking UI.
+ 
   const book = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -91,11 +90,11 @@ export default function Reservations() {
           tableNo: Number(tableNo),
           notes,
         },
-        authConfig // ✅ send token here
+        authConfig 
       );
 
       setMessage(`✅ Booking created! Status: ${res.data.status}`);
-      // reset minimal fields
+     
       setCustomerName("");
       setPhone("");
       setGuests(2);
@@ -107,7 +106,7 @@ export default function Reservations() {
     }
   };
 
-  // ✅ Your backend uses PATCH /:id/status (not PUT)
+  
   const updateStatus = async (id, status) => {
     if (!isAdmin) return;
 

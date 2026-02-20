@@ -10,7 +10,7 @@ exports.createRazorpayOrder = async (req, res) => {
     const dbOrder = await Order.findById(orderId);
     if (!dbOrder) return res.status(404).json({ message: "Order not found" });
 
-    // only owner can pay
+    
     if (String(dbOrder.user) !== String(req.userId)) {
       return res.status(403).json({ message: "Not allowed" });
     }

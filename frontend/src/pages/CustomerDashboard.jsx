@@ -9,23 +9,23 @@ function CustomerDashboard() {
   const [menu, setMenu] = useState([]);
   const [myOrders, setMyOrders] = useState([]);
 
-  // ✅ CART
-  const [cart, setCart] = useState([]); // [{_id,name,price,quantity}]
+  //  CART
+  const [cart, setCart] = useState([]); 
 
-  // ✅ CHECKOUT FIELDS
+  // CHECKOUT FIELDS
   const [customerName, setCustomerName] = useState(user?.name || "");
   const [phone, setPhone] = useState("");
-  const [orderType, setOrderType] = useState("Parcel"); // Parcel / Dining / Delivery
+  const [orderType, setOrderType] = useState("Parcel"); 
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash"); // Cash / UPI / Razorpay
+  const [paymentMethod, setPaymentMethod] = useState("Cash"); 
 
-  // ✅ REVIEWS
+  // REVIEWS
   const [selectedMenuId, setSelectedMenuId] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
 
-  // ✅ RESERVATION (NEW)
+  //  RESERVATION 
   const [resName, setResName] = useState(user?.name || "");
   const [resPhone, setResPhone] = useState("");
   const [resDate, setResDate] = useState("");
@@ -52,12 +52,12 @@ function CustomerDashboard() {
     const [menuRes, ordersRes, myResRes] = await Promise.all([
       api.get("/api/menu?available=true"),
       api.get("/api/orders/my"),
-      api.get("/api/reservations/my"), // ✅ NEW
+      api.get("/api/reservations/my"), 
     ]);
 
     setMenu(menuRes.data || []);
     setMyOrders(ordersRes.data || []);
-    setMyReservations(myResRes.data || []); // ✅ NEW
+    setMyReservations(myResRes.data || []); 
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ function CustomerDashboard() {
     navigate("/");
   };
 
-  // ✅ ADD TO CART
+  //  ADD TO CART
   const addToCart = (m) => {
     setCart((prev) => {
       const exists = prev.find((x) => x._id === m._id);
@@ -99,7 +99,7 @@ function CustomerDashboard() {
     setCart((prev) => prev.filter((x) => x._id !== id));
   };
 
-  // ✅ PLACE ORDER
+  //  PLACE ORDER
   const placeOrder = async () => {
     setMsg("");
 
@@ -124,7 +124,7 @@ function CustomerDashboard() {
         deliveryAddress: orderType === "Delivery" ? deliveryAddress : "",
         scheduledTime: scheduledTime || "",
         paymentMethod,
-        paymentStatus: "Unpaid", // keep unpaid, then pay using Razorpay button
+        paymentStatus: "Unpaid", 
         items: cart.map((c) => ({
           name: c.name,
           price: c.price,
@@ -143,7 +143,7 @@ function CustomerDashboard() {
     }
   };
 
-  // ✅ REVIEWS
+  //  REVIEWS
   const submitReview = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -161,7 +161,7 @@ function CustomerDashboard() {
     }
   };
 
-  // ✅ RESERVATION: CHECK AVAILABILITY (NEW)
+  //  RESERVATION: CHECK AVAILABILITY (NEW)
   const checkAvailability = async (d, t) => {
     if (!d || !t) return;
     try {
@@ -176,7 +176,7 @@ function CustomerDashboard() {
     }
   };
 
-  // ✅ RESERVATION: BOOK (NEW)
+  //  RESERVATION: BOOK (NEW)
   const bookReservation = async (e) => {
     e.preventDefault();
     setMsg("");

@@ -11,13 +11,13 @@ const {
   deleteOrder,
 } = require("../controllers/orderController");
 
-// ✅ Customer places order (must be logged in)
+//  Customer places order (must be logged in)
 router.post("/", protect, createOrder);
 
-// ✅ Customer: view only their orders
+//  Customer: view only their orders
 router.get("/my", protect, getMyOrders);
 
-// ✅ Admin: manage all orders
+// Admin: manage all orders
 router.get("/", protect, adminOnly, getOrders);
 router.put("/:id", protect, adminOnly, updateOrder);
 router.delete("/:id", protect, adminOnly, deleteOrder);

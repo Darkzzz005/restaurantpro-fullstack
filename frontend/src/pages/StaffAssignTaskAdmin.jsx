@@ -31,11 +31,11 @@ export default function StaffAssignTaskAdmin() {
     const auth = { headers: { Authorization: `Bearer ${token}` } };
 
     try {
-      // ✅ staff list
+      // staff list
       const s = await axios.get(`${API}/api/staff`, auth);
       setStaffList(Array.isArray(s.data) ? s.data : []);
 
-      // ✅ tasks list (admin)
+      // tasks list (admin)
       const t = await axios.get(`${API}/api/staff/all-tasks`, auth);
       setTasks(Array.isArray(t.data) ? t.data : []);
     } catch (err) {
@@ -50,7 +50,7 @@ export default function StaffAssignTaskAdmin() {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line
+   
   }, []);
 
   const assignTask = async (e) => {

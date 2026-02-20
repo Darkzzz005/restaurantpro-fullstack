@@ -28,7 +28,7 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-//  prevent one user reviewing same item multiple times
+
 reviewSchema.index({ user: 1, menuItem: 1 }, { unique: true });
 
 module.exports = mongoose.model("Review", reviewSchema);

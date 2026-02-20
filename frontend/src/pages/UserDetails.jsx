@@ -13,7 +13,7 @@ export default function UserDetails() {
   const auth = { headers: { Authorization: `Bearer ${token}` } };
 
   const fetchDetails = async () => {
-    // We’ll fetch all customers and match by name (fastest way without changing backend)
+
     const customersRes = await axios.get(`${API}/api/customers`, auth);
     const customer = customersRes.data.find((c) => c.customerName === decodeURIComponent(name));
 
@@ -22,14 +22,14 @@ export default function UserDetails() {
       return;
     }
 
-    // Now fetch customer detail by id (this endpoint returns customer + orders + reservations)
+  
     const detailRes = await axios.get(`${API}/api/customers/${customer._id}`, auth);
     setData(detailRes.data);
   };
 
   useEffect(() => {
     fetchDetails();
-    // eslint-disable-next-line
+ 
   }, [name]);
 
   if (!data) {

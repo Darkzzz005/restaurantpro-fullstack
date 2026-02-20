@@ -17,7 +17,7 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line
+   
   }, []);
 
   const updateStatus = async (id, status) => {

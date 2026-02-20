@@ -2,7 +2,7 @@ const User = require("../models/User");
 const StaffTask = require("../models/StaffTask");
 const Attendance = require("../models/Attendance");
 
-// helper: YYYY-MM-DD
+// YYYY-MM-DD
 const todayStr = () => {
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -11,7 +11,7 @@ const todayStr = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// ✅ Admin: list staff users
+//  Admin: list staff users
 exports.getStaffList = async (req, res) => {
   try {
     const staff = await User.find({ role: "staff" }).select("_id name email role");
@@ -21,7 +21,7 @@ exports.getStaffList = async (req, res) => {
   }
 };
 
-// ✅ Admin: assign task to staff
+//  Admin: assign task to staff
 exports.assignTask = async (req, res) => {
   try {
     const { staffId, title, description, priority, dueDate } = req.body;
@@ -50,7 +50,7 @@ exports.assignTask = async (req, res) => {
   }
 };
 
-// ✅ Admin: view all tasks (optionally filter by staffId)
+// Admin: view all tasks (optionally filter by staffId)
 exports.getAllTasks = async (req, res) => {
   try {
     const filter = {};
@@ -67,7 +67,7 @@ exports.getAllTasks = async (req, res) => {
   }
 };
 
-// ✅ Staff: view my tasks
+//  Staff: view my tasks
 exports.getMyTasks = async (req, res) => {
   try {
     const tasks = await StaffTask.find({ staff: req.userId }).sort({ createdAt: -1 });
@@ -77,7 +77,7 @@ exports.getMyTasks = async (req, res) => {
   }
 };
 
-// ✅ Staff: update my task status (Assigned/In Progress/Completed)
+//  Staff: update my task status (Assigned/In Progress/Completed)
 exports.updateMyTaskStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -98,7 +98,7 @@ exports.updateMyTaskStatus = async (req, res) => {
   }
 };
 
-// ✅ Admin: update any task (cancel etc.)
+//  Admin: update any task (cancel etc.)
 exports.adminUpdateTask = async (req, res) => {
   try {
     const updated = await StaffTask.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -109,7 +109,7 @@ exports.adminUpdateTask = async (req, res) => {
   }
 };
 
-// ✅ Staff: check-in (creates/updates today attendance)
+//  Staff: check-in (creates/updates today attendance)
 exports.checkIn = async (req, res) => {
   try {
     const date = todayStr();
@@ -125,12 +125,12 @@ exports.checkIn = async (req, res) => {
 
     res.json(record);
   } catch (err) {
-    // duplicate index conflict safety
+    
     res.status(500).json({ message: err.message });
   }
 };
 
-// ✅ Staff: check-out
+//  Staff: check-out
 exports.checkOut = async (req, res) => {
   try {
     const date = todayStr();
@@ -148,7 +148,7 @@ exports.checkOut = async (req, res) => {
   }
 };
 
-// ✅ Admin: view attendance (optional filter date or staffId)
+//  Admin: view attendance 
 exports.getAttendance = async (req, res) => {
   try {
     const filter = {};
@@ -166,7 +166,7 @@ exports.getAttendance = async (req, res) => {
   }
 };
 
-// ✅ Admin: mark absent/leave manually
+//  Admin: mark attendance (for staff who forgot to check-in/out)
 exports.adminMarkAttendance = async (req, res) => {
   try {
     const { staffId, date, status, notes } = req.body;

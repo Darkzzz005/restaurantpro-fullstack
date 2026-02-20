@@ -34,7 +34,7 @@ exports.createOrder = async (req, res) => {
       scheduledTime,
     } = req.body;
 
-    //  save user id in order (so we can show only their orders)
+    //  save user id in order 
     const order = await Order.create({
       user: req.userId, 
 
@@ -102,7 +102,7 @@ exports.deleteOrder = async (req, res) => {
 //  GET MY ORDERS (customer)
 exports.getMyOrders = async (req, res) => {
   try {
-    //  match the schema field: user (not userId)
+    
     const orders = await Order.find({ user: req.userId }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {

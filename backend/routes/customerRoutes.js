@@ -6,7 +6,7 @@ const Order = require("../models/Order");
 const Reservation = require("../models/Reservation");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
-// ✅ Get all customers (admin)
+//  Get all customers (admin)
 router.get("/", protect, adminOnly, async (req, res) => {
   try {
     const customers = await Customer.find().sort({ updatedAt: -1 });
@@ -16,7 +16,7 @@ router.get("/", protect, adminOnly, async (req, res) => {
   }
 });
 
-// ✅ Customer details + history (admin)
+// Customer details + history (admin)
 router.get("/:id", protect, adminOnly, async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);

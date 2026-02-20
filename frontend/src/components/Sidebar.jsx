@@ -5,7 +5,7 @@ export default function Sidebar() {
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user"); // ✅ also remove user
+    localStorage.removeItem("user"); 
     navigate("/");
   };
 
@@ -34,7 +34,7 @@ export default function Sidebar() {
         <NavLink to="/users" style={linkStyle}>👤 Users</NavLink>
         <NavLink to="/settings" style={linkStyle}>⚙ Settings</NavLink>
 
-        {/* ✅ NEW: STAFF MANAGEMENT (ADMIN) */}
+        {/*  STAFF MANAGEMENT (ADMIN) */}
         <div style={styles.sectionTitle}>Staff Management</div>
         <NavLink to="/staff-admin" style={linkStyle}>👥 Staff List</NavLink>
         <NavLink to="/staff-admin/assign" style={linkStyle}>📝 Assign Work</NavLink>

@@ -14,7 +14,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// ✅ GET all payments (admin can use later if you want)
+// GET all payments 
 router.get("/", protect, async (req, res) => {
   try {
     const rows = await Payment.find().sort({ createdAt: -1 });
@@ -24,7 +24,7 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-// ✅ CREATE Razorpay order (Customer Pay Now)
+// CREATE Razorpay order (Customer Pay Now)
 router.post("/razorpay/order", protect, async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -42,7 +42,7 @@ router.post("/razorpay/order", protect, async (req, res) => {
       receipt: `rcpt_${dbOrder._id}`,
     });
 
-    // save gateway order id inside order (optional but useful)
+    // save gateway order id inside order 
     dbOrder.gatewayOrderId = rpOrder.id;
     dbOrder.paymentMethod = "Razorpay";
     await dbOrder.save();
@@ -60,7 +60,7 @@ router.post("/razorpay/order", protect, async (req, res) => {
   }
 });
 
-// ✅ VERIFY payment (Customer after payment)
+//  VERIFY payment (Customer after payment)
 router.post("/razorpay/verify", protect, async (req, res) => {
   try {
     const { dbOrderId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;

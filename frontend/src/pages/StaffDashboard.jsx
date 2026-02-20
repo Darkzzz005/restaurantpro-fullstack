@@ -20,7 +20,7 @@ function StaffDashboard() {
 
   useEffect(() => {
     load().catch((e) => setMsg(e?.response?.data?.message || "Failed to load staff data"));
-    // eslint-disable-next-line
+    
   }, []);
 
   const logout = () => {

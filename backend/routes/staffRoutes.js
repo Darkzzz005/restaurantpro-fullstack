@@ -7,9 +7,9 @@ const Staff = require("../models/Staff");
 const Attendance = require("../models/Attendance");
 const Task = require("../models/Task");
 
-// =========================
+
 // ✅ ADMIN: STAFF LIST
-// =========================
+
 router.get("/", protect, adminOnly, async (req, res) => {
   try {
     const staff = await Staff.find().sort({ createdAt: -1 });
@@ -19,9 +19,9 @@ router.get("/", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =========================
-// ✅ ADMIN: CREATE STAFF
-// =========================
+
+// ADMIN: CREATE STAFF
+
 router.post("/", protect, adminOnly, async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -39,9 +39,9 @@ router.post("/", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =========================
-// ✅ ADMIN: ATTENDANCE LIST
-// =========================
+
+//  ADMIN: ATTENDANCE LIST
+
 router.get("/attendance", protect, adminOnly, async (req, res) => {
   try {
     const records = await Attendance.find()
@@ -54,9 +54,9 @@ router.get("/attendance", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =========================
-// ✅ ADMIN: MARK ATTENDANCE
-// =========================
+
+//  ADMIN: MARK ATTENDANCE
+
 router.post("/attendance", protect, adminOnly, async (req, res) => {
   try {
     const { staff, date, status, notes, checkIn, checkOut } = req.body;
@@ -81,9 +81,9 @@ router.post("/attendance", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =========================
-// ✅ ADMIN: ASSIGN TASK
-// =========================
+
+//  ADMIN: ASSIGN TASK
+
 router.post("/assign-task", protect, adminOnly, async (req, res) => {
   try {
     const { staff, title, description, priority, dueDate } = req.body;
@@ -93,7 +93,7 @@ router.post("/assign-task", protect, adminOnly, async (req, res) => {
     }
 
     const task = await Task.create({
-      staff: staff, // ✅ IMPORTANT (matches Task schema)
+      staff: staff, 
       title,
       description: description || "",
       priority: priority || "Medium",
@@ -109,13 +109,13 @@ router.post("/assign-task", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =========================
-// ✅ ADMIN: GET ALL TASKS
-// =========================
+
+//  ADMIN: GET ALL TASKS
+
 router.get("/all-tasks", protect, adminOnly, async (req, res) => {
   try {
     const tasks = await Task.find()
-      .populate("staff", "name email role") // ✅ IMPORTANT
+      .populate("staff", "name email role") 
       .sort({ createdAt: -1 });
 
     res.json(tasks);
@@ -125,14 +125,14 @@ router.get("/all-tasks", protect, adminOnly, async (req, res) => {
   }
 });
 
-// =====================================================
-// ✅ STAFF SIDE ROUTES
-// =====================================================
 
-// ✅ STAFF: GET MY TASKS
+//  STAFF SIDE ROUTES
+
+
+//  STAFF: GET MY TASKS
 router.get("/my/tasks", protect, async (req, res) => {
   try {
-    // (Optional) Only staff
+    //  Only staff
     if (req.user.role !== "staff") {
       return res.status(403).json({ message: "Only staff can view tasks" });
     }
@@ -145,7 +145,7 @@ router.get("/my/tasks", protect, async (req, res) => {
   }
 });
 
-// ✅ STAFF: UPDATE MY TASK STATUS
+//  STAFF: UPDATE MY TASK STATUS
 router.patch("/my/tasks/:taskId/status", protect, async (req, res) => {
   try {
     if (req.user.role !== "staff") {
@@ -161,7 +161,7 @@ router.patch("/my/tasks/:taskId/status", protect, async (req, res) => {
     }
 
     const task = await Task.findOneAndUpdate(
-      { _id: taskId, staff: req.user._id }, // ✅ IMPORTANT
+      { _id: taskId, staff: req.user._id }, 
       { status },
       { new: true }
     );
@@ -177,7 +177,7 @@ router.patch("/my/tasks/:taskId/status", protect, async (req, res) => {
   }
 });
 
-// ✅ STAFF: CHECK-IN
+//  STAFF: CHECK-IN
 router.post("/my/attendance/check-in", protect, async (req, res) => {
   try {
     if (req.user.role !== "staff") {
@@ -213,7 +213,7 @@ router.post("/my/attendance/check-in", protect, async (req, res) => {
   }
 });
 
-// ✅ STAFF: CHECK-OUT
+//  STAFF: CHECK-OUT
 router.post("/my/attendance/check-out", protect, async (req, res) => {
   try {
     if (req.user.role !== "staff") {

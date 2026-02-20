@@ -16,7 +16,7 @@ export default function StaffAdmin() {
 
     const token = localStorage.getItem("token");
 
-    // ✅ Avoid blank page / silent failures
+    // Avoid blank page / silent failures
     if (!token) {
       setMsg("Not logged in. Please login as admin first.");
       return;
@@ -25,7 +25,7 @@ export default function StaffAdmin() {
     const auth = { headers: { Authorization: `Bearer ${token}` } };
 
     try {
-      // ✅ Correct endpoint (matches your backend GET "/api/staff")
+      
       const res = await axios.get(`${API}/api/staff`, auth);
       setStaff(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
@@ -41,7 +41,7 @@ export default function StaffAdmin() {
 
   useEffect(() => {
     fetchStaff();
-    // eslint-disable-next-line
+
   }, []);
 
   return (

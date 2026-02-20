@@ -108,7 +108,7 @@ function Card({ title, value }) {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#0f172a",   // 🔥 Dark navy background
+    background: "#0f172a",   
     padding: 20,
     color: "white",
   },

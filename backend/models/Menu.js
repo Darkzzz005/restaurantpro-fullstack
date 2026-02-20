@@ -17,13 +17,13 @@ const menuSchema = new mongoose.Schema(
     //  Customization / filters
     dietaryTags: {
       type: [String],
-      default: [], // e.g. ["veg","vegan","gluten-free","jain","spicy","no-onion-garlic"]
+      default: [], 
     },
 
-    //  Optional: quick filters
+    //  quick filters
     spiceLevel: { type: String, enum: ["none", "mild", "medium", "hot"], default: "none" },
 
-    //  Analytics support (optional)
+    //  Analytics support 
     ordersCount: { type: Number, default: 0 },
   },
   { timestamps: true }

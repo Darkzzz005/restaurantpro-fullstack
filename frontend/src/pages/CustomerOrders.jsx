@@ -27,7 +27,7 @@ export default function CustomerOrders() {
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line
+   
   }, []);
 
   const payNow = async (order) => {

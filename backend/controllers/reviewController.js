@@ -21,7 +21,7 @@ exports.createReview = async (req, res) => {
 
     res.status(201).json(review);
   } catch (err) {
-    // unique index error -> already reviewed
+    
     if (err.code === 11000) {
       return res.status(400).json({ message: "You already reviewed this item" });
     }

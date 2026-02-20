@@ -30,7 +30,7 @@ const attendanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ one record per staff per date
+// one record per staff per date
 attendanceSchema.index({ staff: 1, date: 1 }, { unique: true });
 
 module.exports = mongoose.model("Attendance", attendanceSchema);

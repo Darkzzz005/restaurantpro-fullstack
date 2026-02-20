@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema(
 
     totalAmount: { type: Number, required: true },
 
-    status: { type: String, default: "Pending" }, // Pending/Preparing/Completed/Cancelled
+    status: { type: String, default: "Pending" }, 
 
     orderType: { type: String, default: "Parcel" },
     deliveryAddress: { type: String, default: "" },

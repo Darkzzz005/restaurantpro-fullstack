@@ -17,7 +17,7 @@ const reservationSchema = new mongoose.Schema(
 
     guests: { type: Number, required: true },
 
-    // Table assigned by admin (optional initially)
+    // Table assigned by admin 
     tableNo: { type: Number, default: null },
 
     notes: { type: String, default: "" },
