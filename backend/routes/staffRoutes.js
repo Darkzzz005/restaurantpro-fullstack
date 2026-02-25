@@ -1,4 +1,3 @@
-// backend/routes/staffRoutes.js
 const express = require("express");
 const router = express.Router();
 
@@ -8,7 +7,7 @@ const Attendance = require("../models/Attendance");
 const Task = require("../models/Task");
 
 
-// ✅ ADMIN: STAFF LIST
+//  ADMIN: STAFF LIST
 
 router.get("/", protect, adminOnly, async (req, res) => {
   try {
@@ -184,13 +183,13 @@ router.post("/my/attendance/check-in", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-in" });
     }
 
-    const staffId = req.userId; // ✅ FIXED HERE
+    const staffId = req.userId; 
 
     if (!staffId) {
       return res.status(401).json({ message: "Invalid token (no user id)" });
     }
 
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const today = new Date().toISOString().slice(0, 10); 
 
     let record = await Attendance.findOne({ staff: staffId, date: today });
 
@@ -225,12 +224,12 @@ router.post("/my/attendance/check-out", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-out" });
     }
 
-    const staffId = req.userId; // ✅ IMPORTANT (same fix as check-in)
+    const staffId = req.userId; 
     if (!staffId) {
       return res.status(401).json({ message: "Invalid token (no user id)" });
     }
 
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const today = new Date().toISOString().slice(0, 10); 
 
     const record = await Attendance.findOne({ staff: staffId, date: today });
     if (!record) {
@@ -241,8 +240,8 @@ router.post("/my/attendance/check-out", protect, async (req, res) => {
       return res.status(400).json({ message: "You have not checked in yet today" });
     }
 
-    record.checkOut = new Date();   // ✅ matches your schema
-    record.markedBy = staffId;      // ✅ required
+    record.checkOut = new Date();   
+    record.markedBy = staffId;      
     await record.save();
 
     return res.json(record);
