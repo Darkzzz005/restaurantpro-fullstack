@@ -11,7 +11,7 @@ const todayStr = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-//  Admin: list staff users
+// Admin: list staff users
 exports.getStaffList = async (req, res) => {
   try {
     const staff = await User.find({ role: "staff" }).select("_id name email role");
@@ -50,7 +50,7 @@ exports.assignTask = async (req, res) => {
   }
 };
 
-// Admin: view all tasks (optionally filter by staffId)
+//  Admin: view all tasks (optionally filter by staffId)
 exports.getAllTasks = async (req, res) => {
   try {
     const filter = {};
@@ -67,7 +67,7 @@ exports.getAllTasks = async (req, res) => {
   }
 };
 
-//  Staff: view my tasks
+// Staff: view my tasks
 exports.getMyTasks = async (req, res) => {
   try {
     const tasks = await StaffTask.find({ staff: req.userId }).sort({ createdAt: -1 });
@@ -98,7 +98,7 @@ exports.updateMyTaskStatus = async (req, res) => {
   }
 };
 
-//  Admin: update any task (cancel etc.)
+// Admin: update any task (cancel etc.)
 exports.adminUpdateTask = async (req, res) => {
   try {
     const updated = await StaffTask.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -109,24 +109,35 @@ exports.adminUpdateTask = async (req, res) => {
   }
 };
 
-//  Staff: check-in (creates/updates today attendance)
+//  Staff: check-in (creates today's attendance)
 exports.checkIn = async (req, res) => {
   try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     const date = todayStr();
 
-    const record = await Attendance.findOneAndUpdate(
-      { staff: req.userId, date },
-      {
-        $setOnInsert: { staff: req.userId, date },
-        $set: { checkIn: new Date(), status: "Present", markedBy: req.userId },
-      },
-      { upsert: true, new: true }
-    );
-
-    res.json(record);
-  } catch (err) {
     
-    res.status(500).json({ message: err.message });
+    const existing = await Attendance.findOne({ staff: userId, date });
+    if (existing) {
+      return res.status(400).json({ message: "Already checked in today", record: existing });
+    }
+
+    const attendance = await Attendance.create({
+      staff: userId,
+      date,
+      checkIn: new Date(),   
+      status: "Present",
+      markedBy: userId,      
+    });
+
+    return res.status(201).json(attendance);
+  } catch (e) {
+    console.error("CHECK-IN ERROR:", e);
+    return res.status(500).json({ message: "Check-in failed", error: e.message });
   }
 };
 
@@ -136,10 +147,13 @@ exports.checkOut = async (req, res) => {
     const date = todayStr();
 
     const record = await Attendance.findOne({ staff: req.userId, date });
-    if (!record) return res.status(404).json({ message: "No check-in record found for today" });
+    if (!record) {
+      return res.status(404).json({ message: "No check-in record found for today" });
+    }
 
-    record.checkOut = new Date();
+    record.checkOut = new Date();  
     record.markedBy = req.userId;
+
     await record.save();
 
     res.json(record);
@@ -148,7 +162,7 @@ exports.checkOut = async (req, res) => {
   }
 };
 
-//  Admin: view attendance 
+//  Admin: view attendance
 exports.getAttendance = async (req, res) => {
   try {
     const filter = {};

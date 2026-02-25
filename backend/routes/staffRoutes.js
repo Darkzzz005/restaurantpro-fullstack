@@ -184,7 +184,12 @@ router.post("/my/attendance/check-in", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-in" });
     }
 
-    const staffId = req.user?._id;
+    const staffId = req.userId; // ✅ FIXED HERE
+
+    if (!staffId) {
+      return res.status(401).json({ message: "Invalid token (no user id)" });
+    }
+
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
     let record = await Attendance.findOne({ staff: staffId, date: today });
@@ -220,17 +225,24 @@ router.post("/my/attendance/check-out", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-out" });
     }
 
-    const staffId = req.user?._id;
-    const today = new Date().toISOString().slice(0, 10);
+    const staffId = req.userId; // ✅ IMPORTANT (same fix as check-in)
+    if (!staffId) {
+      return res.status(401).json({ message: "Invalid token (no user id)" });
+    }
+
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
     const record = await Attendance.findOne({ staff: staffId, date: today });
-
     if (!record) {
       return res.status(400).json({ message: "No check-in found for today" });
     }
 
-    record.checkOut = new Date();
-    record.markedBy = staffId;
+    if (!record.checkIn) {
+      return res.status(400).json({ message: "You have not checked in yet today" });
+    }
+
+    record.checkOut = new Date();   // ✅ matches your schema
+    record.markedBy = staffId;      // ✅ required
     await record.save();
 
     return res.json(record);
