@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const { protect } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
 const Payment = require("../models/Payment");
+const { generateInvoicePDF } = require("../utils/invoiceGenerator");
 
 // Razorpay instance
 const razorpay = new Razorpay({
@@ -89,6 +90,14 @@ router.post("/razorpay/verify", protect, async (req, res) => {
     order.gatewayOrderId = razorpay_order_id;
     order.gatewayPaymentId = razorpay_payment_id;
     order.paidAt = new Date();
+
+    //  Generate invoice if not already generated
+    if (!order.invoiceUrl) {
+      const { invoiceNo, invoiceUrl } = generateInvoicePDF(order);
+      order.invoiceNumber = invoiceNo;
+      order.invoiceUrl = invoiceUrl;
+    }
+
     await order.save();
 
     // Create payment record for analytics revenue
@@ -99,10 +108,10 @@ router.post("/razorpay/verify", protect, async (req, res) => {
       status: "Success",
     });
 
-    res.json({ message: "Payment verified & order updated", order });
+    res.json({ message: "Payment verified, invoice generated", order });
   } catch (err) {
     console.log("razorpay/verify error:", err);
-    res.status(500).json({ message: "Payment verification failed" });
+    res.status(500).json({ message: "Payment verification failed", error: err.message });
   }
 });
 

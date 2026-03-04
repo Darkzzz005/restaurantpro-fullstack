@@ -99,7 +99,7 @@ export default function Orders() {
                   {o.items?.map((i) => `${i.name} x${i.quantity}`).join(", ")}
                 </div>
 
-                {/* ✅ PAYMENT STATUS ONLY (NO PAY BUTTON) */}
+                {/*  PAYMENT STATUS  */}
                 <div style={styles.paymentRow}>
                   <div style={{ fontWeight: 800 }}>
                     Payment:{" "}

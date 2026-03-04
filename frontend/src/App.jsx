@@ -179,7 +179,7 @@ function App() {
 />
 
 
-        {/* Public route (optional) */}
+        {/* Public route */}
         <Route path="/menu" element={<Menu />} />
 
         {/* Fallback */}
