@@ -10,15 +10,15 @@ function CustomerDashboard() {
   const [myOrders, setMyOrders] = useState([]);
 
   //  CART
-  const [cart, setCart] = useState([]); 
+  const [cart, setCart] = useState([]);
 
   // CHECKOUT FIELDS
   const [customerName, setCustomerName] = useState(user?.name || "");
   const [phone, setPhone] = useState("");
-  const [orderType, setOrderType] = useState("Parcel"); 
+  const [orderType, setOrderType] = useState("Parcel");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash"); 
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
 
   // REVIEWS
   const [selectedMenuId, setSelectedMenuId] = useState("");
@@ -52,12 +52,12 @@ function CustomerDashboard() {
     const [menuRes, ordersRes, myResRes] = await Promise.all([
       api.get("/api/menu?available=true"),
       api.get("/api/orders/my"),
-      api.get("/api/reservations/my"), 
+      api.get("/api/reservations/my"),
     ]);
 
     setMenu(menuRes.data || []);
     setMyOrders(ordersRes.data || []);
-    setMyReservations(myResRes.data || []); 
+    setMyReservations(myResRes.data || []);
   };
 
   useEffect(() => {
@@ -124,7 +124,7 @@ function CustomerDashboard() {
         deliveryAddress: orderType === "Delivery" ? deliveryAddress : "",
         scheduledTime: scheduledTime || "",
         paymentMethod,
-        paymentStatus: "Unpaid", 
+        paymentStatus: "Unpaid",
         items: cart.map((c) => ({
           name: c.name,
           price: c.price,
@@ -279,10 +279,26 @@ function CustomerDashboard() {
           <div style={styles.list}>
             {menu.map((m) => (
               <div key={m._id} style={styles.row}>
-                <div>
-                  <b>{m.name}</b>
-                  <div style={styles.small}>
-                    {m.category} • ₹{m.price}
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  {m.image && (
+                    <img
+                      src={`http://localhost:5000${m.image}`}
+                      alt={m.name}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        objectFit: "cover",
+                        borderRadius: 10,
+                        border: "1px solid rgba(255,255,255,0.15)",
+                      }}
+                    />
+                  )}
+
+                  <div>
+                    <b>{m.name}</b>
+                    <div style={styles.small}>
+                      {m.category} • ₹{m.price}
+                    </div>
                   </div>
                 </div>
 

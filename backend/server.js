@@ -56,6 +56,10 @@ app.use("/api/payments", paymentRoutes);
 // Invoice Static Folder
 app.use("/invoices", express.static(path.join(__dirname, "invoices")));
 
+// Food Images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
 // Reviews
 app.use("/api/reviews", reviewRoutes);
 

@@ -1,6 +1,6 @@
 const Menu = require("../models/Menu");
 
-//  Public: Get menu (supports filters)
+// Public: Get menu (supports filters)
 exports.getMenu = async (req, res) => {
   try {
     const { category, available, q, tag } = req.query;
@@ -33,28 +33,71 @@ exports.getMenu = async (req, res) => {
   }
 };
 
-//  Admin: Add item
+// Admin: Add item (supports image upload)
 exports.createMenuItem = async (req, res) => {
   try {
-    const item = await Menu.create(req.body);
+    // Build data from req.body, then attach image if uploaded
+    const data = { ...req.body };
+
+    // multer adds file info here
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`; // ✅ store public URL
+    }
+
+    // price should be number
+    if (data.price !== undefined) data.price = Number(data.price);
+
+    // dietaryTags may arrive as JSON string or comma-separated string
+    if (typeof data.dietaryTags === "string") {
+      try {
+        const parsed = JSON.parse(data.dietaryTags);
+        data.dietaryTags = Array.isArray(parsed)
+          ? parsed
+          : String(data.dietaryTags).split(",").map((t) => t.trim()).filter(Boolean);
+      } catch {
+        data.dietaryTags = String(data.dietaryTags).split(",").map((t) => t.trim()).filter(Boolean);
+      }
+    }
+
+    const item = await Menu.create(data);
     res.status(201).json(item);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-//  Admin: Update item
+// Admin: Update item (supports image upload)
 exports.updateMenuItem = async (req, res) => {
   try {
-    const updated = await Menu.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const data = { ...req.body };
+
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`; // ✅ update image if new one uploaded
+    }
+
+    if (data.price !== undefined) data.price = Number(data.price);
+
+    if (typeof data.dietaryTags === "string") {
+      try {
+        const parsed = JSON.parse(data.dietaryTags);
+        data.dietaryTags = Array.isArray(parsed)
+          ? parsed
+          : String(data.dietaryTags).split(",").map((t) => t.trim()).filter(Boolean);
+      } catch {
+        data.dietaryTags = String(data.dietaryTags).split(",").map((t) => t.trim()).filter(Boolean);
+      }
+    }
+
+    const updated = await Menu.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!updated) return res.status(404).json({ message: "Menu item not found" });
+
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-//  Admin: Delete item
+// Admin: Delete item
 exports.deleteMenuItem = async (req, res) => {
   try {
     const deleted = await Menu.findByIdAndDelete(req.params.id);
@@ -65,7 +108,7 @@ exports.deleteMenuItem = async (req, res) => {
   }
 };
 
-//  Admin: Toggle availability quickly
+// Admin: Toggle availability quickly
 exports.toggleAvailability = async (req, res) => {
   try {
     const { isAvailable } = req.body; // true/false
