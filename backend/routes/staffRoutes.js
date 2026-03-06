@@ -5,15 +5,20 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
 const Staff = require("../models/Staff");
 const Attendance = require("../models/Attendance");
 const Task = require("../models/Task");
+const User = require("../models/User");
 
 
 //  ADMIN: STAFF LIST
 
 router.get("/", protect, adminOnly, async (req, res) => {
   try {
-    const staff = await Staff.find().sort({ createdAt: -1 });
+    const staff = await User.find({ role: "staff" })
+      .select("_id name email role")
+      .sort({ createdAt: -1 });
+
     res.json(staff);
   } catch (err) {
+    console.log("GET STAFF LIST ERROR:", err);
     res.status(500).json({ message: "Error fetching staff" });
   }
 });
@@ -85,20 +90,25 @@ router.post("/attendance", protect, adminOnly, async (req, res) => {
 
 router.post("/assign-task", protect, adminOnly, async (req, res) => {
   try {
-    const { staff, title, description, priority, dueDate } = req.body;
+    const { staffId, title, description, priority, dueDate } = req.body;
 
-    if (!staff || !title) {
+    if (!staffId || !title) {
       return res.status(400).json({ message: "Staff and title are required" });
     }
 
+    const staffUser = await User.findById(staffId);
+    if (!staffUser || staffUser.role !== "staff") {
+      return res.status(404).json({ message: "Staff user not found" });
+    }
+
     const task = await Task.create({
-      staff: staff, 
+      staff: staffId,
       title,
       description: description || "",
       priority: priority || "Medium",
       dueDate: dueDate || null,
       status: "Pending",
-      assignedBy: req.user?._id,
+      assignedBy: req.userId || req.user?._id,
     });
 
     res.status(201).json(task);
@@ -114,7 +124,7 @@ router.post("/assign-task", protect, adminOnly, async (req, res) => {
 router.get("/all-tasks", protect, adminOnly, async (req, res) => {
   try {
     const tasks = await Task.find()
-      .populate("staff", "name email role") 
+      .populate("staff", "name email role")
       .sort({ createdAt: -1 });
 
     res.json(tasks);
@@ -136,7 +146,7 @@ router.get("/my/tasks", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can view tasks" });
     }
 
-    const tasks = await Task.find({ staff: req.user._id }).sort({ createdAt: -1 });
+    const tasks = await Task.find({ staff: req.userId }).sort({ createdAt: -1 });
     res.json(tasks);
   } catch (err) {
     console.log("GET MY TASKS ERROR:", err);
@@ -160,7 +170,7 @@ router.patch("/my/tasks/:taskId/status", protect, async (req, res) => {
     }
 
     const task = await Task.findOneAndUpdate(
-      { _id: taskId, staff: req.user._id }, 
+      { _id: taskId, staff: req.userId },
       { status },
       { new: true }
     );
@@ -183,13 +193,13 @@ router.post("/my/attendance/check-in", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-in" });
     }
 
-    const staffId = req.userId; 
+    const staffId = req.userId;
 
     if (!staffId) {
       return res.status(401).json({ message: "Invalid token (no user id)" });
     }
 
-    const today = new Date().toISOString().slice(0, 10); 
+    const today = new Date().toISOString().slice(0, 10);
 
     let record = await Attendance.findOne({ staff: staffId, date: today });
 
@@ -224,12 +234,12 @@ router.post("/my/attendance/check-out", protect, async (req, res) => {
       return res.status(403).json({ message: "Only staff can check-out" });
     }
 
-    const staffId = req.userId; 
+    const staffId = req.userId;
     if (!staffId) {
       return res.status(401).json({ message: "Invalid token (no user id)" });
     }
 
-    const today = new Date().toISOString().slice(0, 10); 
+    const today = new Date().toISOString().slice(0, 10);
 
     const record = await Attendance.findOne({ staff: staffId, date: today });
     if (!record) {
@@ -240,8 +250,8 @@ router.post("/my/attendance/check-out", protect, async (req, res) => {
       return res.status(400).json({ message: "You have not checked in yet today" });
     }
 
-    record.checkOut = new Date();   
-    record.markedBy = staffId;      
+    record.checkOut = new Date();
+    record.markedBy = staffId;
     await record.save();
 
     return res.json(record);

@@ -3,4 +3,5 @@ node_modules/
 dist/
 logs/
 *.log
-backend/invoices/
+uploads/
+invoices/

@@ -69,14 +69,14 @@ export default function StaffAssignTaskAdmin() {
 
     try {
       await axios.post(
-        `${API}/api/staff/assign-task`,
-        {
-          staff: staffId,
-          title: title.trim(),
-          description: description.trim(),
-          priority,
-          dueDate,
-        },
+  `${API}/api/staff/assign-task`,
+  {
+    staffId: staffId,
+    title: title.trim(),
+    description: description.trim(),
+    priority,
+    dueDate,
+  },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
