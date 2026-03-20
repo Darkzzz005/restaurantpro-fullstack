@@ -24,21 +24,21 @@ exports.registerUser = async (req, res) => {
       role
     });
 
-   res.status(201).json({
-  message: "User registered successfully",
-  user: {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  }
-});
-
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 //  LOGIN 
 exports.loginUser = async (req, res) => {
@@ -49,6 +49,13 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    //  BLOCK CHECK (ADDED)
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "Your account is blocked by admin"
+      });
     }
 
     // Compare password
@@ -64,18 +71,61 @@ exports.loginUser = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-   res.json({
-  message: "Login successful",
-  token,
-  user: {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-});
+};
 
 
+// BLOCK / UNBLOCK USER (NEW)
+exports.toggleBlockUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prevent blocking admin
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "Cannot block admin" });
+    }
+
+    // Toggle block status
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+
+    res.json({
+      message: user.isBlocked
+        ? "User blocked successfully"
+        : "User unblocked successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//  GET ALL USERS 
+exports.getAllUsers = async (req, res) => {
+  try {
+  
+    const users = await User.find({ role: { $ne: "admin" } }).select("-password");
+
+    res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

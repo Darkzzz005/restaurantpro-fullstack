@@ -9,10 +9,8 @@ function CustomerDashboard() {
   const [menu, setMenu] = useState([]);
   const [myOrders, setMyOrders] = useState([]);
 
-  //  CART
   const [cart, setCart] = useState([]);
 
-  // CHECKOUT FIELDS
   const [customerName, setCustomerName] = useState(user?.name || "");
   const [phone, setPhone] = useState("");
   const [orderType, setOrderType] = useState("Parcel");
@@ -20,12 +18,10 @@ function CustomerDashboard() {
   const [scheduledTime, setScheduledTime] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
 
-  // REVIEWS
   const [selectedMenuId, setSelectedMenuId] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
 
-  //  RESERVATION 
   const [resName, setResName] = useState(user?.name || "");
   const [resPhone, setResPhone] = useState("");
   const [resDate, setResDate] = useState("");
@@ -34,6 +30,9 @@ function CustomerDashboard() {
   const [resNotes, setResNotes] = useState("");
   const [bookedTables, setBookedTables] = useState([]);
   const [myReservations, setMyReservations] = useState([]);
+
+  const [menuSearch, setMenuSearch] = useState("");
+  const [menuCategory, setMenuCategory] = useState("All");
 
   const [msg, setMsg] = useState("");
 
@@ -46,6 +45,24 @@ function CustomerDashboard() {
       ),
     [cart]
   );
+
+  const categories = useMemo(() => {
+    const allCategories = menu.map((item) => item.category).filter(Boolean);
+    return ["All", ...new Set(allCategories)];
+  }, [menu]);
+
+  const filteredMenu = useMemo(() => {
+    return menu.filter((item) => {
+      const matchesSearch = item.name
+        ?.toLowerCase()
+        .includes(menuSearch.toLowerCase());
+
+      const matchesCategory =
+        menuCategory === "All" || item.category === menuCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [menu, menuSearch, menuCategory]);
 
   const loadAll = async () => {
     setMsg("");
@@ -73,7 +90,6 @@ function CustomerDashboard() {
     navigate("/");
   };
 
-  //  ADD TO CART
   const addToCart = (m) => {
     setCart((prev) => {
       const exists = prev.find((x) => x._id === m._id);
@@ -92,14 +108,15 @@ function CustomerDashboard() {
   const updateQty = (id, qty) => {
     const q = Number(qty);
     if (Number.isNaN(q) || q < 1) return;
-    setCart((prev) => prev.map((x) => (x._id === id ? { ...x, quantity: q } : x)));
+    setCart((prev) =>
+      prev.map((x) => (x._id === id ? { ...x, quantity: q } : x))
+    );
   };
 
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((x) => x._id !== id));
   };
 
-  //  PLACE ORDER
   const placeOrder = async () => {
     setMsg("");
 
@@ -135,7 +152,7 @@ function CustomerDashboard() {
 
       await api.post("/api/orders", payload);
 
-      setMsg("✅ Order placed successfully!");
+      setMsg("Order placed successfully!");
       setCart([]);
       await loadAll();
     } catch (err) {
@@ -143,7 +160,6 @@ function CustomerDashboard() {
     }
   };
 
-  //  REVIEWS
   const submitReview = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -154,29 +170,25 @@ function CustomerDashboard() {
         rating: Number(rating),
         comment,
       });
-      setMsg("✅ Review submitted!");
+      setMsg("Review submitted!");
       setComment("");
     } catch (err) {
       setMsg(err?.response?.data?.message || "Failed to submit review");
     }
   };
 
-  //  RESERVATION: CHECK AVAILABILITY (NEW)
   const checkAvailability = async (d, t) => {
     if (!d || !t) return;
     try {
-      // IMPORTANT: using api so token is attached
       const res = await api.get(
         `/api/reservations/availability?date=${d}&time=${t}`
       );
       setBookedTables(res.data.bookedTables || []);
     } catch (e) {
-      // if token missing/expired => 401
       setBookedTables([]);
     }
   };
 
-  //  RESERVATION: BOOK (NEW)
   const bookReservation = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -196,7 +208,7 @@ function CustomerDashboard() {
         notes: resNotes || "",
       });
 
-      setMsg("✅ Reservation booked!");
+      setMsg("Reservation booked!");
       setResNotes("");
       await loadAll();
     } catch (err) {
@@ -204,7 +216,6 @@ function CustomerDashboard() {
     }
   };
 
-  // ✅ PAY NOW (Razorpay)
   const payNow = async (order) => {
     setMsg("");
     try {
@@ -212,7 +223,8 @@ function CustomerDashboard() {
         orderId: order._id,
       });
 
-      const { keyId, razorpayOrderId, amount, currency, dbOrderId } = createRes.data;
+      const { keyId, razorpayOrderId, amount, currency, dbOrderId } =
+        createRes.data;
 
       if (!keyId) {
         setMsg("Razorpay keyId missing. Check backend .env RAZORPAY_KEY_ID");
@@ -240,13 +252,15 @@ function CustomerDashboard() {
               razorpay_signature: response.razorpay_signature,
             });
 
-            setMsg("✅ Payment successful!");
+            setMsg("Payment successful!");
             await loadAll();
           } catch (err) {
-            setMsg(err?.response?.data?.message || "Payment verification failed");
+            setMsg(
+              err?.response?.data?.message || "Payment verification failed"
+            );
           }
         },
-        theme: { color: "#3b82f6" },
+        theme: { color: "#b08968" },
       };
 
       const rzp = new window.Razorpay(options);
@@ -273,52 +287,77 @@ function CustomerDashboard() {
       {msg && <div style={styles.msg}>{msg}</div>}
 
       <div style={styles.grid}>
-        {/* ✅ MENU + ADD TO CART */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Menu (Available)</h3>
-          <div style={styles.list}>
-            {menu.map((m) => (
-              <div key={m._id} style={styles.row}>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  {m.image && (
-                    <img
-                      src={`http://localhost:5000${m.image}`}
-                      alt={m.name}
-                      style={{
-                        width: 60,
-                        height: 60,
-                        objectFit: "cover",
-                        borderRadius: 10,
-                        border: "1px solid rgba(255,255,255,0.15)",
-                      }}
-                    />
-                  )}
 
-                  <div>
-                    <b>{m.name}</b>
-                    <div style={styles.small}>
-                      {m.category} • ₹{m.price}
+          <div style={styles.filterWrap}>
+            <input
+              type="text"
+              placeholder="Search menu item..."
+              value={menuSearch}
+              onChange={(e) => setMenuSearch(e.target.value)}
+              style={styles.field}
+            />
+
+            <select
+              value={menuCategory}
+              onChange={(e) => setMenuCategory(e.target.value)}
+              style={styles.field}
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={styles.list}>
+            {filteredMenu.length === 0 ? (
+              <div style={styles.emptyState}>No menu items found.</div>
+            ) : (
+              filteredMenu.map((m) => (
+                <div key={m._id} style={styles.row}>
+                  <div
+                    style={{ display: "flex", gap: 12, alignItems: "center" }}
+                  >
+                    {m.image && (
+                      <img
+                        src={`http://localhost:5000${m.image}`}
+                        alt={m.name}
+                        style={styles.menuImage}
+                      />
+                    )}
+
+                    <div>
+                      <b style={styles.itemName}>{m.name}</b>
+                      <div style={styles.small}>
+                        {m.category} • ₹{m.price}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    style={styles.smallBtn}
-                    onClick={() => setSelectedMenuId(m._id)}
-                  >
-                    Review
-                  </button>
-                  <button style={styles.primaryBtn} onClick={() => addToCart(m)}>
-                    + Add
-                  </button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      style={styles.smallBtn}
+                      onClick={() => setSelectedMenuId(m._id)}
+                    >
+                      Review
+                    </button>
+
+                    <button
+                      style={styles.primaryBtn}
+                      onClick={() => addToCart(m)}
+                    >
+                      + Add
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
-        {/* ✅ CART + CHECKOUT */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>🛒 Cart</h3>
 
@@ -329,11 +368,13 @@ function CustomerDashboard() {
               {cart.map((c) => (
                 <div key={c._id} style={styles.orderRow}>
                   <div>
-                    <b>{c.name}</b>
+                    <b style={styles.itemName}>{c.name}</b>
                     <div style={styles.small}>₹{c.price} each</div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div
+                    style={{ display: "flex", gap: 8, alignItems: "center" }}
+                  >
                     <input
                       type="number"
                       min={1}
@@ -362,126 +403,157 @@ function CustomerDashboard() {
 
           <h3 style={styles.cardTitle}>Checkout</h3>
 
-          <label style={styles.label}>Name</label>
-          <input
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            style={styles.input}
-          />
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Name</label>
+            <input
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              style={styles.field}
+            />
+          </div>
 
-          <label style={styles.label}>Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} style={styles.input} />
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Phone</label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={styles.field}
+            />
+          </div>
 
-          <label style={styles.label}>Order Type</label>
-          <select
-            value={orderType}
-            onChange={(e) => setOrderType(e.target.value)}
-            style={styles.input}
-          >
-            <option>Parcel</option>
-            <option>Dining</option>
-            <option>Delivery</option>
-          </select>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Order Type</label>
+            <select
+              value={orderType}
+              onChange={(e) => setOrderType(e.target.value)}
+              style={styles.field}
+            >
+              <option>Parcel</option>
+              <option>Dining</option>
+              <option>Delivery</option>
+            </select>
+          </div>
 
           {orderType === "Delivery" && (
-            <>
+            <div style={styles.formGroup}>
               <label style={styles.label}>Delivery Address</label>
               <input
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
-                style={styles.input}
+                style={styles.field}
               />
-            </>
+            </div>
           )}
 
-          <label style={styles.label}>Scheduled Time (optional)</label>
-          <input
-            value={scheduledTime}
-            onChange={(e) => setScheduledTime(e.target.value)}
-            style={styles.input}
-          />
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Scheduled Time (optional)</label>
+            <input
+              value={scheduledTime}
+              onChange={(e) => setScheduledTime(e.target.value)}
+              style={styles.field}
+            />
+          </div>
 
-          <label style={styles.label}>Payment Method</label>
-          <select
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            style={styles.input}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Payment Method</label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              style={styles.field}
+            >
+              <option>Cash</option>
+              <option>UPI</option>
+              <option>Razorpay</option>
+            </select>
+          </div>
+
+          <button
+            onClick={placeOrder}
+            style={{ ...styles.primaryBtn, width: "100%" }}
           >
-            <option>Cash</option>
-            <option>UPI</option>
-            <option>Razorpay</option>
-          </select>
-
-          <button onClick={placeOrder} style={{ ...styles.primaryBtn, width: "100%" }}>
-            ✅ Place Order
+            Place Order
           </button>
         </div>
 
-        {/* ✅ RESERVATIONS (NEW) */}
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>📅 Book a Table</h3>
+          <h3 style={styles.cardTitle}>Book a Table</h3>
 
           <form onSubmit={bookReservation}>
-            <label style={styles.label}>Name</label>
-            <input
-              value={resName}
-              onChange={(e) => setResName(e.target.value)}
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Name</label>
+              <input
+                value={resName}
+                onChange={(e) => setResName(e.target.value)}
+                style={styles.field}
+              />
+            </div>
 
-            <label style={styles.label}>Phone</label>
-            <input
-              value={resPhone}
-              onChange={(e) => setResPhone(e.target.value)}
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Phone</label>
+              <input
+                value={resPhone}
+                onChange={(e) => setResPhone(e.target.value)}
+                style={styles.field}
+              />
+            </div>
 
-            <label style={styles.label}>Date</label>
-            <input
-              type="date"
-              value={resDate}
-              onChange={(e) => {
-                setResDate(e.target.value);
-                checkAvailability(e.target.value, resTime);
-              }}
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Date</label>
+              <input
+                type="date"
+                value={resDate}
+                onChange={(e) => {
+                  setResDate(e.target.value);
+                  checkAvailability(e.target.value, resTime);
+                }}
+                style={styles.field}
+              />
+            </div>
 
-            <label style={styles.label}>Time</label>
-            <input
-              type="time"
-              value={resTime}
-              onChange={(e) => {
-                setResTime(e.target.value);
-                checkAvailability(resDate, e.target.value);
-              }}
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Time</label>
+              <input
+                type="time"
+                value={resTime}
+                onChange={(e) => {
+                  setResTime(e.target.value);
+                  checkAvailability(resDate, e.target.value);
+                }}
+                style={styles.field}
+              />
+            </div>
 
-            <div style={styles.small}>
+            <div style={{ ...styles.small, marginBottom: 12 }}>
               Booked tables:{" "}
               {bookedTables.length === 0 ? "None" : bookedTables.join(", ")}
             </div>
 
-            <label style={styles.label}>Guests</label>
-            <input
-              type="number"
-              min={1}
-              value={resGuests}
-              onChange={(e) => setResGuests(e.target.value)}
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Guests</label>
+              <input
+                type="number"
+                min={1}
+                value={resGuests}
+                onChange={(e) => setResGuests(e.target.value)}
+                style={styles.field}
+              />
+            </div>
 
-            <label style={styles.label}>Notes</label>
-            <input
-              value={resNotes}
-              onChange={(e) => setResNotes(e.target.value)}
-              placeholder="Window seat, birthday, etc."
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Notes</label>
+              <textarea
+                value={resNotes}
+                onChange={(e) => setResNotes(e.target.value)}
+                placeholder="Window seat, birthday, etc."
+                style={styles.textarea}
+              />
+            </div>
 
-            <button type="submit" style={{ ...styles.primaryBtn, width: "100%" }}>
-              ✅ Book Reservation
+            <button
+              type="submit"
+              style={{ ...styles.primaryBtn, width: "100%" }}
+            >
+              Book Reservation
             </button>
           </form>
 
@@ -495,13 +567,15 @@ function CustomerDashboard() {
               {myReservations.map((r) => (
                 <div key={r._id} style={styles.orderRow}>
                   <div>
-                    <b>
+                    <b style={styles.itemName}>
                       {r.date} {r.time}
                     </b>{" "}
                     <span style={styles.badge}>{r.status}</span>
                     <div style={styles.small}>
                       Guests: {r.guests}{" "}
-                      {r.tableNo ? `• Table: ${r.tableNo}` : "• Table: Not assigned yet"}
+                      {r.tableNo
+                        ? `• Table: ${r.tableNo}`
+                        : "• Table: Not assigned yet"}
                     </div>
                     {r.notes ? <div style={styles.small}>{r.notes}</div> : null}
                   </div>
@@ -511,46 +585,51 @@ function CustomerDashboard() {
           )}
         </div>
 
-        {/* Reviews */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Give Review</h3>
 
           <form onSubmit={submitReview}>
-            <label style={styles.label}>Menu Item</label>
-            <select
-              value={selectedMenuId}
-              onChange={(e) => setSelectedMenuId(e.target.value)}
-              style={styles.input}
-              required
-            >
-              <option value="">Select item</option>
-              {menu.map((m) => (
-                <option key={m._id} value={m._id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Menu Item</label>
+              <select
+                value={selectedMenuId}
+                onChange={(e) => setSelectedMenuId(e.target.value)}
+                style={styles.field}
+                required
+              >
+                <option value="">Select item</option>
+                {menu.map((m) => (
+                  <option key={m._id} value={m._id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <label style={styles.label}>Rating</label>
-            <select
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
-              style={styles.input}
-            >
-              {[5, 4, 3, 2, 1].map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Rating</label>
+              <select
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+                style={styles.field}
+              >
+                {[5, 4, 3, 2, 1].map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <label style={styles.label}>Comment</label>
-            <input
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Type feedback..."
-              style={styles.input}
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Comment</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Type feedback..."
+                style={styles.textarea}
+              />
+            </div>
 
             <button type="submit" style={styles.primaryBtn}>
               Submit Review
@@ -558,7 +637,6 @@ function CustomerDashboard() {
           </form>
         </div>
 
-        {/* My Orders */}
         <div style={{ ...styles.card, gridColumn: "1 / -1" }}>
           <h3 style={styles.cardTitle}>My Orders</h3>
           {myOrders.length === 0 ? (
@@ -568,16 +646,20 @@ function CustomerDashboard() {
               {myOrders.map((o) => (
                 <div key={o._id} style={styles.orderRow}>
                   <div>
-                    <b>₹{o.totalAmount}</b>{" "}
+                    <b style={styles.itemName}>₹{o.totalAmount}</b>{" "}
                     <span style={styles.badge}>{o.status}</span>{" "}
                     <span style={styles.badge2}>{o.paymentStatus}</span>
                     <div style={styles.small}>
-                      {o.orderType} • {new Date(o.createdAt).toLocaleString()}
+                      {o.orderType} •{" "}
+                      {new Date(o.createdAt).toLocaleString()}
                     </div>
                   </div>
 
                   {o.paymentStatus !== "Paid" ? (
-                    <button style={styles.primaryBtn} onClick={() => payNow(o)}>
+                    <button
+                      style={styles.primaryBtn}
+                      onClick={() => payNow(o)}
+                    >
                       Pay Now
                     </button>
                   ) : (
@@ -591,10 +673,12 @@ function CustomerDashboard() {
           )}
         </div>
 
-        {/* More */}
         <div style={{ ...styles.card, gridColumn: "1 / -1" }}>
           <h3 style={styles.cardTitle}>More</h3>
-          <button style={styles.smallBtn} onClick={() => navigate("/my-orders")}>
+          <button
+            style={styles.smallBtn}
+            onClick={() => navigate("/my-orders")}
+          >
             Open My Orders Page
           </button>
         </div>
@@ -604,30 +688,276 @@ function CustomerDashboard() {
 }
 
 const styles = {
-  container: { minHeight: "100vh", background: "#0f172a", color: "white", padding: 24 },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  title: { margin: 0, fontSize: 28 },
-  sub: { margin: "6px 0 0", color: "#94a3b8" },
-  logout: { background: "#ef4444", color: "white", border: "none", padding: "10px 14px", borderRadius: 8, cursor: "pointer" },
-  msg: { background: "#1e293b", padding: 12, borderRadius: 10, marginBottom: 16, border: "1px solid rgba(255,255,255,0.08)" },
-  grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
-  card: { background: "#1e293b", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)" },
-  cardTitle: { marginTop: 0, marginBottom: 12 },
-  list: { display: "flex", flexDirection: "column", gap: 10, maxHeight: 320, overflow: "auto" },
-  row: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: 10, borderRadius: 10, background: "rgba(255,255,255,0.04)" },
-  orderRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: 12, borderRadius: 10, background: "rgba(255,255,255,0.04)" },
-  totalRow: { display: "flex", justifyContent: "space-between", marginTop: 6, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" },
-  small: { color: "#94a3b8", fontSize: 13, marginTop: 4 },
-  label: { display: "block", marginBottom: 6, color: "#cbd5e1", fontSize: 13 },
-  input: { width: "100%", padding: 10, borderRadius: 8, border: "none", outline: "none", marginBottom: 12 },
-  qty: { width: 70, padding: 8, borderRadius: 8, border: "none", outline: "none" },
-  primaryBtn: { background: "#3b82f6", color: "white", border: "none", padding: "10px 12px", borderRadius: 8, cursor: "pointer", fontWeight: 700 },
-  smallBtn: { background: "rgba(59,130,246,0.15)", color: "white", border: "1px solid rgba(59,130,246,0.35)", padding: "8px 10px", borderRadius: 8, cursor: "pointer" },
-  dangerBtn: { background: "rgba(239,68,68,0.20)", color: "white", border: "1px solid rgba(239,68,68,0.35)", padding: "8px 10px", borderRadius: 8, cursor: "pointer", fontWeight: 800 },
-  disabledBtn: { background: "#334155", color: "#94a3b8", border: "none", padding: "10px 12px", borderRadius: 8 },
-  badge: { marginLeft: 8, padding: "3px 8px", borderRadius: 999, background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.35)" },
-  badge2: { marginLeft: 8, padding: "3px 8px", borderRadius: 999, background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.35)" },
-  hr: { border: "none", borderTop: "1px solid rgba(255,255,255,0.10)", margin: "14px 0" },
+  container: {
+    minHeight: "100vh",
+    background: "#f7f3ea",
+    color: "#2c2c2c",
+    padding: 24,
+  },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 16,
+    flexWrap: "wrap",
+  },
+
+  title: {
+    margin: 0,
+    fontSize: 28,
+    fontWeight: 800,
+    color: "#2c2c2c",
+  },
+
+  sub: {
+    margin: "6px 0 0",
+    color: "#7a6f5d",
+  },
+
+  logout: {
+    background: "#d9534f",
+    color: "white",
+    border: "none",
+    padding: "10px 14px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+
+  msg: {
+    background: "#f5efe4",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    border: "1px solid #e6d8c4",
+    color: "#5f5448",
+    fontWeight: 600,
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+    gap: 16,
+  },
+
+  card: {
+    background: "#fffaf3",
+    padding: 16,
+    borderRadius: 16,
+    border: "1px solid #e6d8c4",
+    boxShadow: "0 6px 14px rgba(0,0,0,0.04)",
+  },
+
+  cardTitle: {
+    marginTop: 0,
+    marginBottom: 12,
+    color: "#2c2c2c",
+    fontSize: 20,
+    fontWeight: 800,
+  },
+
+  filterWrap: {
+    display: "grid",
+    gridTemplateColumns: "1fr 180px",
+    gap: 12,
+    marginBottom: 14,
+    padding: 12,
+    background: "#f7efe3",
+    border: "1px solid #e6d8c4",
+    borderRadius: 12,
+  },
+
+  list: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
+
+  maxHeight: "50vh",
+  overflowY: "auto",
+  scrollBehavior: "smooth",
+
+  width: "100%",
+  margin: "0 -16px",
+  padding: "0 16px",
+},
+
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 12,
+    background: "#f7efe3",
+    border: "1px solid #e6d8c4",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+
+  orderRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 12,
+    background: "#f7efe3",
+    border: "1px solid #e6d8c4",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+
+  totalRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: 6,
+    paddingTop: 10,
+    borderTop: "1px solid #e6d8c4",
+    color: "#2c2c2c",
+  },
+
+  small: {
+    color: "#6b5d4d",
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 1.5,
+  },
+
+  label: {
+    display: "block",
+    marginBottom: "6px",
+    fontSize: "14px",
+    fontWeight: 600,
+    color: "#6b5d4d",
+  },
+
+  formGroup: {
+    marginBottom: "14px",
+  },
+
+  field: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "12px 14px",
+    borderRadius: "10px",
+    border: "1px solid #d8c7b0",
+    background: "#fffdf9",
+    color: "#2c2c2c",
+    fontSize: "14px",
+    fontFamily: "inherit",
+    outline: "none",
+    minHeight: "46px",
+  },
+
+  textarea: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "12px 14px",
+    borderRadius: "10px",
+    border: "1px solid #d8c7b0",
+    background: "#fffdf9",
+    color: "#2c2c2c",
+    fontSize: "14px",
+    fontFamily: "inherit",
+    outline: "none",
+    minHeight: "96px",
+    resize: "vertical",
+  },
+
+  qty: {
+    width: 72,
+    boxSizing: "border-box",
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #d8c7b0",
+    outline: "none",
+    background: "#fffdf9",
+    color: "#2c2c2c",
+    fontFamily: "inherit",
+  },
+
+  primaryBtn: {
+    background: "#b08968",
+    color: "white",
+    border: "none",
+    padding: "10px 12px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+
+  smallBtn: {
+    background: "#efe3cf",
+    color: "#5a4630",
+    border: "1px solid #d8c7b0",
+    padding: "8px 10px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: 600,
+  },
+
+  dangerBtn: {
+    background: "#f2d4cf",
+    color: "#8a3b46",
+    border: "1px solid #e3b6ae",
+    padding: "8px 10px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: 800,
+  },
+
+  disabledBtn: {
+    background: "#d8d0c4",
+    color: "#7c7365",
+    border: "none",
+    padding: "10px 12px",
+    borderRadius: 8,
+  },
+
+  badge: {
+    marginLeft: 8,
+    padding: "3px 8px",
+    borderRadius: 999,
+    background: "#dff3e2",
+    color: "#2f6b3b",
+    border: "1px solid #b8ddbf",
+  },
+
+  badge2: {
+    marginLeft: 8,
+    padding: "3px 8px",
+    borderRadius: 999,
+    background: "#efe1f8",
+    color: "#6f4691",
+    border: "1px solid #dbc2ee",
+  },
+
+  hr: {
+    border: "none",
+    borderTop: "1px solid #e6d8c4",
+    margin: "14px 0",
+  },
+
+  menuImage: {
+    width: 60,
+    height: 60,
+    objectFit: "cover",
+    borderRadius: 10,
+    border: "1px solid #e6d8c4",
+  },
+
+  itemName: {
+    color: "#2c2c2c",
+  },
+
+  emptyState: {
+    background: "#f7efe3",
+    border: "1px solid #e6d8c4",
+    borderRadius: 12,
+    padding: 14,
+    color: "#6b5d4d",
+    fontWeight: 600,
+  },
 };
 
 export default CustomerDashboard;

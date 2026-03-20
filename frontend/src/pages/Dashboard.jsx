@@ -41,7 +41,7 @@ export default function Dashboard() {
       <div style={styles.page}>
         <div style={styles.top}>
           <div>
-            <h2 style={{ margin: 0 }}>📊 Analytics Dashboard</h2>
+            <h2 style={styles.heading}> Analytics Dashboard</h2>
             <p style={styles.sub}>Live summary of your restaurant activity</p>
           </div>
           <button onClick={fetchAnalytics} style={styles.btn}>⟳ Refresh</button>
@@ -52,19 +52,20 @@ export default function Dashboard() {
 
         {data && (
           <>
-            {/* TOP CARDS */}
             <div style={styles.grid}>
               <Card title="Total Orders" value={data.totalOrders} />
               <Card title="Reservations" value={data.totalReservations} />
               <Card title="Total Staff" value={data.totalStaff} />
               <Card title="Menu Items" value={data.totalMenuItems} />
               <Card title="Payments" value={data.totalPayments} />
-              <Card title="Revenue" value={`₹ ${Number(data.totalRevenue || 0).toLocaleString()}`} />
+              <Card
+                title="Revenue"
+                value={`₹ ${Number(data.totalRevenue || 0).toLocaleString()}`}
+              />
             </div>
 
-            {/* ORDERS PER DAY */}
             <div style={styles.panel}>
-              <div style={styles.panelTitle}>📅 Orders (Last days)</div>
+              <div style={styles.panelTitle}> Orders (Last days)</div>
 
               {data.ordersPerDay?.length === 0 ? (
                 <div style={styles.empty}>No order chart data.</div>
@@ -108,9 +109,16 @@ function Card({ title, value }) {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#0f172a",   
+    background: "#f7f3ea",
     padding: 20,
-    color: "white",
+    color: "#2c2c2c",
+  },
+
+  heading: {
+    margin: 0,
+    fontSize: "42px",
+    fontWeight: 800,
+    color: "#2c2c2c",
   },
 
   top: {
@@ -124,69 +132,74 @@ const styles = {
 
   sub: {
     margin: "6px 0 0",
-    color: "#94a3b8",
-    fontSize: 13,
+    color: "#7a6f5d",
+    fontSize: 14,
   },
 
   btn: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.12)",
+    background: "#b08968",
+    border: "none",
     color: "white",
-    padding: "10px 14px",
-    borderRadius: 10,
+    padding: "12px 16px",
+    borderRadius: 12,
     cursor: "pointer",
     fontWeight: 800,
   },
 
   msg: {
-    background: "#1e293b",
+    background: "#fffaf3",
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 16,
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid #e6d8c3",
+    color: "#2c2c2c",
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 14,
-    marginBottom: 16,
+    marginBottom: 18,
   },
 
   card: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 14,
-    padding: 14,
+    background: "#fffaf3",
+    border: "1px solid #e6d8c3",
+    borderRadius: 16,
+    padding: 18,
+    boxShadow: "0 6px 14px rgba(0,0,0,0.04)",
   },
 
   cardTitle: {
-    color: "#cbd5e1",
-    fontSize: 13,
+    color: "#7a6f5d",
+    fontSize: 14,
     fontWeight: 800,
   },
 
   cardValue: {
-    marginTop: 8,
-    fontSize: 28,
+    marginTop: 10,
+    fontSize: 30,
     fontWeight: 900,
-    color: "white",
+    color: "#2c2c2c",
   },
 
   panel: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 14,
-    padding: 14,
+    background: "#fffaf3",
+    border: "1px solid #e6d8c3",
+    borderRadius: 16,
+    padding: 16,
+    boxShadow: "0 6px 14px rgba(0,0,0,0.04)",
   },
 
   panelTitle: {
     fontWeight: 900,
-    marginBottom: 10,
+    marginBottom: 12,
+    fontSize: 22,
+    color: "#2c2c2c",
   },
 
   empty: {
-    opacity: 0.9,
+    color: "#7a6f5d",
   },
 
   tableWrap: {
@@ -202,12 +215,14 @@ const styles = {
   th: {
     textAlign: "left",
     padding: 12,
-    borderBottom: "1px solid rgba(255,255,255,0.10)",
-    color: "#cbd5e1",
+    borderBottom: "1px solid #e6d8c3",
+    color: "#7a6f5d",
+    fontWeight: 800,
   },
 
   td: {
     padding: 12,
-    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    borderBottom: "1px solid #efe3d3",
+    color: "#2c2c2c",
   },
 };

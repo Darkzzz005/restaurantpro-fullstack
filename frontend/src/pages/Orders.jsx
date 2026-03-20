@@ -17,7 +17,6 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
-   
   }, []);
 
   const updateStatus = async (id, status) => {
@@ -26,24 +25,28 @@ export default function Orders() {
   };
 
   const badge = (status) => {
-    const color =
-      status === "Pending"
-        ? "#fbbf24"
-        : status === "Preparing"
-        ? "#3b82f6"
-        : status === "Completed"
-        ? "#22c55e"
-        : "#ef4444";
+    const styleMap = {
+      Pending: { bg: "#f4d58d", color: "#6b4f2a" },
+      Preparing: { bg: "#c9daf8", color: "#355c7d" },
+      Completed: { bg: "#cfe8cf", color: "#466b46" },
+      Cancelled: { bg: "#f2c6c2", color: "#8b4a43" },
+    };
+
+    const current = styleMap[status] || {
+      bg: "#eadcc6",
+      color: "#6a5237",
+    };
 
     return (
       <span
         style={{
-          padding: "4px 10px",
+          padding: "8px 14px",
           borderRadius: "999px",
-          backgroundColor: color,
-          color: "#0b1220",
+          backgroundColor: current.bg,
+          color: current.color,
           fontWeight: 800,
-          fontSize: "12px",
+          fontSize: "13px",
+          border: "1px solid rgba(0,0,0,0.04)",
         }}
       >
         {status}
@@ -55,7 +58,13 @@ export default function Orders() {
     <Layout>
       <div style={styles.page}>
         <div style={styles.headerRow}>
-          <h1 style={{ margin: 0 }}>🧾 Orders Management</h1>
+          <div>
+            <h1 style={styles.heading}> Orders Management</h1>
+            <p style={styles.subText}>
+              Track customer orders, payment status, and preparation progress.
+            </p>
+          </div>
+
           <button onClick={fetchOrders} style={styles.refreshBtn}>
             ⟳ Refresh
           </button>
@@ -99,16 +108,13 @@ export default function Orders() {
                   {o.items?.map((i) => `${i.name} x${i.quantity}`).join(", ")}
                 </div>
 
-                {/*  PAYMENT STATUS  */}
                 <div style={styles.paymentRow}>
-                  <div style={{ fontWeight: 800 }}>
+                  <div style={{ fontWeight: 800, color: "#2c2c2c" }}>
                     Payment:{" "}
                     <span
                       style={{
                         color:
-                          o.paymentStatus === "Paid"
-                            ? "#22c55e"
-                            : "#fbbf24",
+                          o.paymentStatus === "Paid" ? "#5c8a5c" : "#b7791f",
                       }}
                     >
                       {o.paymentStatus || "Unpaid"}
@@ -128,14 +134,12 @@ export default function Orders() {
                 </div>
 
                 <div style={styles.actionRow}>
-                  <span style={{ fontWeight: 700 }}>
+                  <span style={{ fontWeight: 700, color: "#2c2c2c" }}>
                     Update Status:
                   </span>
                   <select
                     value={o.status}
-                    onChange={(e) =>
-                      updateStatus(o._id, e.target.value)
-                    }
+                    onChange={(e) => updateStatus(o._id, e.target.value)}
                     style={styles.select}
                   >
                     <option>Pending</option>
@@ -154,97 +158,146 @@ export default function Orders() {
 }
 
 const styles = {
-  page: { minHeight: "100vh" },
+  page: {
+    minHeight: "100vh",
+    background: "#f7f3ea",
+    color: "#2c2c2c",
+  },
+
+  heading: {
+    margin: 0,
+    fontSize: "42px",
+    fontWeight: 800,
+    color: "#2c2c2c",
+  },
+
+  subText: {
+    marginTop: "8px",
+    marginBottom: 0,
+    color: "#7a6f5d",
+    fontSize: "15px",
+  },
 
   headerRow: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "18px",
+    alignItems: "flex-start",
+    gap: "16px",
+    marginBottom: "22px",
+    flexWrap: "wrap",
   },
 
   refreshBtn: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.12)",
+    background: "#b08968",
+    border: "none",
     color: "white",
-    padding: "10px 14px",
-    borderRadius: "10px",
+    padding: "12px 16px",
+    borderRadius: "12px",
     cursor: "pointer",
     fontWeight: 700,
   },
 
   empty: {
     marginTop: "18px",
-    background: "#1e293b",
-    padding: "16px",
-    borderRadius: "12px",
-    opacity: 0.9,
+    background: "#fffaf3",
+    padding: "18px",
+    borderRadius: "16px",
+    border: "1px solid #e6d8c3",
+    color: "#7a6f5d",
+    fontWeight: 600,
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-    gap: "16px",
+    gap: "18px",
   },
 
   card: {
-    backgroundColor: "#1e293b",
-    padding: "16px",
-    borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.08)",
+    backgroundColor: "#fffaf3",
+    padding: "18px",
+    borderRadius: "18px",
+    border: "1px solid #e6d8c3",
+    boxShadow: "0 6px 14px rgba(0,0,0,0.04)",
   },
 
   topRow: {
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: "10px",
+    alignItems: "flex-start",
+    gap: "12px",
+    marginBottom: "12px",
+    flexWrap: "wrap",
   },
 
-  customer: { fontSize: "18px", fontWeight: 900 },
+  customer: {
+    fontSize: "22px",
+    fontWeight: 800,
+    color: "#2c2c2c",
+  },
 
-  mini: { marginTop: "6px", opacity: 0.9 },
+  mini: {
+    marginTop: "6px",
+    color: "#6f6657",
+  },
 
   deliveryBox: {
-    marginTop: "10px",
-    padding: "10px",
-    borderRadius: "12px",
-    background: "rgba(15,23,42,0.55)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    marginTop: "12px",
+    padding: "12px",
+    borderRadius: "14px",
+    background: "#f3ebdf",
+    border: "1px solid #e6d8c3",
+    color: "#4d453a",
   },
 
-  total: { marginTop: "12px" },
+  total: {
+    marginTop: "14px",
+    color: "#2c2c2c",
+    fontSize: "17px",
+  },
 
-  items: { marginTop: "8px", opacity: 0.9 },
+  items: {
+    marginTop: "10px",
+    color: "#6f6657",
+    lineHeight: 1.6,
+  },
 
   paymentRow: {
-    marginTop: "10px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  invoiceBtn: {
-    padding: "8px 12px",
-    borderRadius: "10px",
-    background: "#334155",
-    color: "white",
-    fontWeight: 700,
-    textDecoration: "none",
-  },
-
-  actionRow: {
     marginTop: "14px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap",
+  },
+
+  invoiceBtn: {
+    padding: "10px 14px",
+    borderRadius: "10px",
+    background: "#d8c3a5",
+    color: "#4e3723",
+    fontWeight: 700,
+    textDecoration: "none",
+    border: "1px solid #ccb08a",
+  },
+
+  actionRow: {
+    marginTop: "16px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap",
   },
 
   select: {
-    padding: "10px",
+    padding: "10px 12px",
     borderRadius: "10px",
-    border: "none",
+    border: "1px solid #d8c7b0",
+    background: "#fffdf9",
+    color: "#2c2c2c",
     cursor: "pointer",
-    minWidth: "150px",
+    minWidth: "160px",
     fontWeight: 700,
   },
 };

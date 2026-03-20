@@ -19,31 +19,25 @@ function Login() {
         password,
       });
 
-      // save token + user
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       const role = res.data.user?.role;
 
-      // role-based redirect
-      if (role === "admin") {
-        navigate("/dashboard");
-      } else if (role === "staff") {
-        navigate("/staff");
-      } else {
-        navigate("/customer");
-      }
+      if (role === "admin") navigate("/dashboard");
+      else if (role === "staff") navigate("/staff");
+      else navigate("/customer");
 
     } catch (err) {
       setError(err?.response?.data?.message || "Invalid credentials");
     }
   };
 
-
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.title}>RestaurantPro</h2>
+        <p style={styles.subtitle}>Restaurant Management System</p>
 
         {error && <p style={styles.error}>{error}</p>}
 
@@ -76,48 +70,70 @@ function Login() {
 }
 
 const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#0f172a",
+
+  container:{
+    height:"100vh",
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    background:"#f7f3ea",
   },
-  card: {
-    backgroundColor: "#1e293b",
-    padding: "40px",
-    borderRadius: "12px",
-    width: "350px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+
+  card:{
+    background:"#fffaf3",
+    padding:"40px",
+    borderRadius:"16px",
+    width:"360px",
+    border:"1px solid #e6d8c4",
+    boxShadow:"0 10px 25px rgba(0,0,0,0.06)",
   },
-  title: {
-    color: "white",
-    textAlign: "center",
-    marginBottom: "20px",
+
+  title:{
+    textAlign:"center",
+    marginBottom:"6px",
+    fontSize:"28px",
+    fontWeight:"800",
+    color:"#2c2c2c"
   },
-  input: {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "15px",
-    borderRadius: "6px",
-    border: "none",
-    outline: "none",
+
+  subtitle:{
+    textAlign:"center",
+    fontSize:"14px",
+    color:"#7a6f5d",
+    marginBottom:"22px"
   },
-  button: {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#3b82f6",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
+
+  input:{
+    width:"100%",
+    padding:"12px 14px",
+    marginBottom:"14px",
+    borderRadius:"10px",
+    border:"1px solid #e6d8c4",
+    fontSize:"14px",
+    outline:"none",
+    boxSizing:"border-box",
+    background:"#ffffff"
   },
-  error: {
-    color: "red",
-    marginBottom: "10px",
-    textAlign: "center",
+
+  button:{
+    width:"100%",
+    padding:"12px",
+    background:"#b08968",
+    color:"white",
+    border:"none",
+    borderRadius:"10px",
+    cursor:"pointer",
+    fontWeight:"700",
+    fontSize:"15px"
   },
+
+  error:{
+    color:"#b91c1c",
+    marginBottom:"12px",
+    textAlign:"center",
+    fontWeight:"600"
+  }
+
 };
 
 export default Login;

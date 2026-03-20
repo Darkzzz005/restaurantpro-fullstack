@@ -7,7 +7,6 @@ import MenuList from "./pages/MenuList";
 import Menu from "./Menu";
 import Orders from "./pages/Orders";
 import Users from "./pages/Users";
-import Settings from "./pages/Settings";
 import Reservations from "./pages/Reservations";
 import UserDetails from "./pages/UserDetails";
 import CustomerOrders from "./pages/CustomerOrders";
@@ -106,14 +105,7 @@ function App() {
             </RequireRole>
           }
         />
-        <Route
-          path="/settings"
-          element={
-            <RequireRole role="admin">
-              <Settings />
-            </RequireRole>
-          }
-        />
+    
         <Route
           path="/reservations"
           element={

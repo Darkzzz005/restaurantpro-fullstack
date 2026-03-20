@@ -6,46 +6,90 @@ import { useNavigate } from "react-router-dom";
 const API = "http://localhost:5000";
 
 export default function Users() {
-  const [customers, setCustomers] = useState([]);
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
-  const fetchCustomers = async () => {
+  const fetchUsers = async () => {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/");
 
-    const res = await axios.get(`${API}/api/customers`, {
+    const res = await axios.get(`${API}/api/auth/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    setCustomers(res.data);
+
+    setUsers(res.data);
+  };
+
+  const handleBlock = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `${API}/api/auth/block-user/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      alert("Updated successfully");
+      fetchUsers();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchUsers();
   }, []);
 
   return (
     <Layout>
-      <div style={{ minHeight: "100vh" }}>
+      <div style={styles.page}>
         <div style={styles.headerRow}>
-          <h1 style={{ margin: 0 }}>👤 Customers</h1>
-          <button onClick={fetchCustomers} style={styles.btn}>⟳ Refresh</button>
+          <div>
+            <h1 style={styles.heading}>👤 Users</h1>
+            <p style={styles.subText}>
+              Manage customers and staff access permissions.
+            </p>
+          </div>
+
+          <button onClick={fetchUsers} style={styles.btn}>
+            ⟳ Refresh
+          </button>
         </div>
 
-        {customers.length === 0 ? (
-          <div style={styles.empty}>No customers found yet.</div>
+        {users.length === 0 ? (
+          <div style={styles.empty}>No users found.</div>
         ) : (
           <div style={styles.grid}>
-            {customers.map((c) => (
-              <div
-                key={c.customerName}
-                style={styles.card}
-                onClick={() => navigate(`/users/${encodeURIComponent(c.customerName)}`)}
-              >
-                <div style={styles.name}>{c.customerName}</div>
-                <div style={styles.mini}>📞 {c.phone || "N/A"}</div>
-                <div style={styles.row}>Orders: <b>{c.totalOrders}</b></div>
-                <div style={styles.row}>Reservations: <b>{c.totalReservations}</b></div>
-                <div style={styles.row}>Spent: <b>₹{c.totalSpent}</b></div>
+            {users
+  .filter((u) => u.role !== "admin") 
+  .map((u) => (
+              <div key={u._id} style={styles.card}>
+                
+                <div style={styles.name}>{u.name}</div>
+                <div style={styles.phone}>{u.email}</div>
+
+                <div style={styles.row}>
+                  Role: <b>{u.role}</b>
+                </div>
+
+                <div style={styles.row}>
+                  Status:{" "}
+                  <b style={{ color: u.isBlocked ? "red" : "green" }}>
+                    {u.isBlocked ? "Blocked" : "Active"}
+                  </b>
+                </div>
+
+                {/*  BLOCK BUTTON */}
+                <button
+                  style={styles.blockBtn}
+                  onClick={() => handleBlock(u._id)}
+                >
+                  {u.isBlocked ? "Unblock" : "Block"}
+                </button>
+
               </div>
             ))}
           </div>
@@ -56,37 +100,86 @@ export default function Users() {
 }
 
 const styles = {
-  headerRow: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  page: {
+    minHeight: "100vh",
+    background: "#f7f3ea",
+    color: "#2c2c2c",
+  },
+
+  headerRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "16px",
+    flexWrap: "wrap",
+    marginBottom: "20px",
+  },
+
+  heading: {
+    margin: 0,
+    fontSize: "42px",
+    fontWeight: 800,
+  },
+
+  subText: {
+    marginTop: "8px",
+    color: "#7a6f5d",
+  },
+
   btn: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.12)",
+    background: "#b08968",
+    border: "none",
     color: "white",
-    padding: "10px 14px",
-    borderRadius: "10px",
+    padding: "12px 16px",
+    borderRadius: "12px",
     cursor: "pointer",
     fontWeight: 700,
   },
+
   empty: {
     marginTop: 16,
-    background: "#1e293b",
-    padding: 16,
-    borderRadius: 12,
-    opacity: 0.9,
+    background: "#fffaf3",
+    padding: 18,
+    borderRadius: 16,
+    border: "1px solid #e6d8c3",
   },
+
   grid: {
     marginTop: 16,
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: 14,
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gap: 18,
   },
+
   card: {
-    background: "#1e293b",
-    padding: 16,
-    borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.08)",
-    cursor: "pointer",
+    background: "#fffaf3",
+    padding: 20,
+    borderRadius: 18,
+    border: "1px solid #e6d8c3",
+    boxShadow: "0 6px 14px rgba(0,0,0,0.04)",
   },
-  name: { fontSize: 18, fontWeight: 900 },
-  mini: { marginTop: 6, opacity: 0.85 },
-  row: { marginTop: 8, opacity: 0.95 },
+
+  name: {
+    fontSize: 24,
+    fontWeight: 800,
+  },
+
+  phone: {
+    marginTop: 10,
+  },
+
+  row: {
+    marginTop: 12,
+  },
+
+  blockBtn: {
+    marginTop: 14,
+    padding: "10px",
+    borderRadius: "10px",
+    border: "none",
+    background: "#d9534f",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
 };

@@ -16,11 +16,14 @@ const userSchema = new mongoose.Schema(
       required: true
     },
     role: {
-  type: String,
-  enum: ["customer", "admin", "staff"],
-  default: "customer"
-}
-
+      type: String,
+      enum: ["customer", "admin", "staff"],
+      default: "customer"
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

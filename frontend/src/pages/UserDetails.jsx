@@ -13,29 +13,28 @@ export default function UserDetails() {
   const auth = { headers: { Authorization: `Bearer ${token}` } };
 
   const fetchDetails = async () => {
-
     const customersRes = await axios.get(`${API}/api/customers`, auth);
-    const customer = customersRes.data.find((c) => c.customerName === decodeURIComponent(name));
+    const customer = customersRes.data.find(
+      (c) => c.customerName === decodeURIComponent(name)
+    );
 
     if (!customer) {
       setData({ notFound: true });
       return;
     }
 
-  
     const detailRes = await axios.get(`${API}/api/customers/${customer._id}`, auth);
     setData(detailRes.data);
   };
 
   useEffect(() => {
     fetchDetails();
- 
   }, [name]);
 
   if (!data) {
     return (
       <Layout>
-        <div style={{ padding: 20, color: "white" }}>Loading customer...</div>
+        <div style={{ padding: 20 }}>Loading customer...</div>
       </Layout>
     );
   }
@@ -43,7 +42,7 @@ export default function UserDetails() {
   if (data.notFound) {
     return (
       <Layout>
-        <div style={{ padding: 20, color: "white" }}>Customer not found.</div>
+        <div style={{ padding: 20 }}>Customer not found.</div>
       </Layout>
     );
   }
@@ -52,8 +51,10 @@ export default function UserDetails() {
 
   return (
     <Layout>
-      <div style={{ color: "white" }}>
+      <div style={styles.page}>
         <h1 style={{ marginTop: 0 }}>👤 {customer.customerName}</h1>
+
+        {/* TOP INFO */}
         <div style={styles.topGrid}>
           <div style={styles.box}>📞 Phone: <b>{customer.phone || "N/A"}</b></div>
           <div style={styles.box}>⭐ Loyalty Points: <b>{customer.loyaltyPoints}</b></div>
@@ -61,18 +62,24 @@ export default function UserDetails() {
           <div style={styles.box}>💰 Total Spent: <b>₹{customer.totalSpent}</b></div>
         </div>
 
-        <h2 style={{ marginTop: 24 }}>Recent Orders</h2>
+        {/* ORDERS */}
+        <h2 style={{ marginTop: 30 }}>Recent Orders</h2>
+
         {orders.length === 0 ? (
           <div style={styles.empty}>No orders yet.</div>
         ) : (
           <div style={styles.list}>
             {orders.slice(0, 8).map((o) => (
               <div key={o._id} style={styles.item}>
-                <div><b>{o.orderType}</b> • {o.status} • ₹{o.totalAmount}</div>
-                <div style={{ opacity: 0.85, marginTop: 6 }}>
+                <div style={styles.title}>
+                  {o.orderType} • {o.status} • ₹{o.totalAmount}
+                </div>
+
+                <div style={styles.desc}>
                   {o.items?.map((i) => `${i.name} x${i.quantity}`).join(", ")}
                 </div>
-                <div style={{ opacity: 0.7, marginTop: 6 }}>
+
+                <div style={styles.time}>
                   {new Date(o.createdAt).toLocaleString()}
                 </div>
               </div>
@@ -80,18 +87,24 @@ export default function UserDetails() {
           </div>
         )}
 
-        <h2 style={{ marginTop: 24 }}>Recent Reservations</h2>
+        {/* RESERVATIONS */}
+        <h2 style={{ marginTop: 30 }}>Recent Reservations</h2>
+
         {reservations.length === 0 ? (
           <div style={styles.empty}>No reservations yet.</div>
         ) : (
           <div style={styles.list}>
             {reservations.slice(0, 8).map((r) => (
               <div key={r._id} style={styles.item}>
-                <div><b>Table {r.tableNo}</b> • {r.status}</div>
-                <div style={{ opacity: 0.85, marginTop: 6 }}>
+                <div style={styles.title}>
+                  Table {r.tableNo} • {r.status}
+                </div>
+
+                <div style={styles.desc}>
                   {r.date} • {r.time} • Guests: {r.guests}
                 </div>
-                <div style={{ opacity: 0.7, marginTop: 6 }}>
+
+                <div style={styles.time}>
                   {r.notes || "—"}
                 </div>
               </div>
@@ -104,32 +117,57 @@ export default function UserDetails() {
 }
 
 const styles = {
+  page: {
+    minHeight: "100vh",
+    padding: "20px",
+  },
+
   topGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 12,
-    marginTop: 12,
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 14,
+    marginTop: 14,
   },
+
   box: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.08)",
-    padding: 14,
-    borderRadius: 12,
+    background: "#f5efe4",
+    border: "1px solid #e6d8c4",
+    padding: 16,
+    borderRadius: 14,
+    fontWeight: 600,
   },
+
   empty: {
-    background: "#1e293b",
+    background: "#f5efe4",
     padding: 14,
     borderRadius: 12,
-    opacity: 0.9,
+    border: "1px solid #e6d8c4",
   },
+
   list: {
     display: "grid",
     gap: 12,
   },
+
   item: {
-    background: "#1e293b",
-    border: "1px solid rgba(255,255,255,0.08)",
-    padding: 14,
-    borderRadius: 12,
+    background: "#f5efe4",
+    border: "1px solid #e6d8c4",
+    padding: 16,
+    borderRadius: 14,
+  },
+
+  title: {
+    fontWeight: 700,
+  },
+
+  desc: {
+    marginTop: 6,
+    color: "#555",
+  },
+
+  time: {
+    marginTop: 6,
+    color: "#777",
+    fontSize: "13px",
   },
 };
